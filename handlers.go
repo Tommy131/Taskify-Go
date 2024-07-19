@@ -10,7 +10,7 @@
  * @Date         : 2024-02-04 14:10:45
  * @Author       : HanskiJay
  * @LastEditors  : HanskiJay
- * @LastEditTime : 2024-06-10 01:31:56
+ * @LastEditTime : 2024-07-19 17:48:25
  * @E-Mail       : support@owoblog.com
  * @Telegram     : https://t.me/HanskiJay
  * @GitHub       : https://github.com/Tommy131
@@ -20,10 +20,9 @@ package taskify
 import (
 	"fmt"
 	"net/http"
-	"owoweb/utils"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func getUpdateInfo() AppUpdateModel {
@@ -41,14 +40,11 @@ func getUpdateInfo() AppUpdateModel {
 func BugReport(c *gin.Context) {
 	var bugReport BugReportModel
 	if err := c.BindJSON(&bugReport); err != nil {
-		utils.RespondJSONWithError(c, http.StatusBadRequest, "Invalid request")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 		return
 	}
-
-	prefix := ">> Post: "
-	bugContentStr := "%sBug Report from Client [%s]:\nEmail: %s\nTitle: %s\nCategory: %s\nContent: %s\n"
-	fmt.Printf("--------------------\n"+bugContentStr, prefix, c.ClientIP(), bugReport.Email, bugReport.Title, bugReport.Category, bugReport.Content)
-	bugLog.Printf(bugContentStr, prefix, c.ClientIP(), bugReport.Email, bugReport.Title, bugReport.Category, bugReport.Content)
+	bugContentStr := "Taskify >> POST: Bug Report from Client [%s]:\nEmail: %s\nTitle: %s\nCategory: %s\nContent: %s\n"
+	log.Info(fmt.Sprintf(bugContentStr, c.ClientIP(), bugReport.Email, bugReport.Title, bugReport.Category, bugReport.Content))
 
 	c.JSON(http.StatusOK, map[string]string{"status": "success", "message": "Bug Report received successfully"})
 }
@@ -56,5 +52,5 @@ func BugReport(c *gin.Context) {
 // Update checker handler
 func Update(c *gin.Context) {
 	c.JSON(http.StatusOK, getUpdateInfo())
-	updateLog.Printf(">> GET: Client %s requested to check update at %s", c.ClientIP(), time.Now().Format("2006-01-02 15:04:05"))
+	log.Info(fmt.Sprintf("Taskify >> GET: Client %s requested to check update", c.ClientIP()))
 }
